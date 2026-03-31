@@ -24,7 +24,31 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <script dangerouslySetInnerHTML={{ __html: `
+          // Log scroll resets and RSC fetches to help diagnose the bug
+          (function() {
+            var htmlProto = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop');
+            var origFetch = window.fetch;
+            Object.defineProperty(document.documentElement, 'scrollTop', {
+              get: function() { return htmlProto.get.call(this); },
+              set: function(v) {
+                if (v === 0 && window.scrollY > 50)
+                  console.log('[scroll-debug] scrollTop=0 from scrollY=' + window.scrollY);
+                return htmlProto.set.call(this, v);
+              },
+              configurable: true
+            });
+            window.fetch = function(input) {
+              var url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
+              if (url.indexOf('_rsc') !== -1)
+                console.log('[scroll-debug] RSC fetch:', url.substring(0, 120));
+              return origFetch.apply(this, arguments);
+            };
+          })();
+        `}} />
+        {children}
+      </body>
     </html>
   );
 }
