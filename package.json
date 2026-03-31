@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "postinstall": "cp patches-manual/server-patch-reducer.js node_modules/next/dist/client/components/router-reducer/reducers/server-patch-reducer.js && cp patches-manual/ppr-navigations.js node_modules/next/dist/client/components/router-reducer/ppr-navigations.js && cp patches-manual/navigation.js node_modules/next/dist/client/components/segment-cache/navigation.js"
   },
   "dependencies": {
     "next": "16.2.1",
